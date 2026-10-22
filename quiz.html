@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>AfriQuiz — Live</title>
+  <link rel="stylesheet" href="assets/css/styles.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div class="shell" style="padding-top: 40px;">
+    
+    <!-- QUIZ VIEW -->
+    <div id="quizView">
+      <div class="quiz-header">
+        <span class="eyebrow" id="questionProgress">Question 1 of 10</span>
+        <span class="timer" id="quizTimer">5:00</span>
+      </div>
+      
+      <div class="glass card">
+        <h2 class="question-text" id="questionText">Loading question...</h2>
+        <div class="options" id="optionsContainer">
+          <!-- Options injected here -->
+        </div>
+      </div>
+    </div>
+
+    <!-- RESULT VIEW -->
+    <div id="resultView" class="hidden">
+      <div class="glass card" style="text-align: center; padding: 40px 20px;">
+        <p style="font-size: 4rem; margin-bottom: 16px;">🏆</p>
+        <h1 class="hero-title" style="margin: 0;">Quiz Complete!</h1>
+        <p class="hero-sub">You have successfully submitted your score.</p>
+        
+        <div class="stats" style="margin-top: 24px;">
+          <div class="stat glass" style="background: rgba(0,0,0,0.3);">
+            <p class="stat-label">Score</p>
+            <p class="stat-value" id="finalScore">0/10</p>
+          </div>
+          <div class="stat glass" style="background: rgba(0,0,0,0.3);">
+            <p class="stat-label">Time</p>
+            <p class="stat-value" id="finalTime">0:00</p>
+          </div>
+        </div>
+
+        <a href="leaderboard.html" class="btn btn-gold btn-block" style="margin-top: 24px; text-decoration: none;">View Leaderboard</a>
+        <a href="index.html" class="btn btn-block" style="margin-top: 12px; background: transparent; color: var(--muted); text-decoration: none;">Back to Home</a>
+      </div>
+    </div>
+
+  </div>
+  <script type="module" src="assets/js/quiz.js"></script>
+</body>
+          </html>
