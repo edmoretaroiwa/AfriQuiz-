@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>AfriQuiz — Leaderboard</title>
+  <link rel="stylesheet" href="assets/css/styles.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div class="shell">
+    <header class="topbar" style="justify-content: center; margin-top: 20px;">
+      <h1 class="hero-title" style="font-size: 1.5rem; margin: 0;">Global Ranks</h1>
+    </header>
+
+    <div class="glass card">
+      <ul class="mini-board" id="fullBoard">
+        <li style="text-align: center; color: var(--muted);">Loading ranks...</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- Bottom Tabbar -->
+  <nav class="tabbar">
+    <a class="tab" href="index.html">
+      <span class="tab-ico">◈</span><span>Home</span>
+    </a>
+    <a class="tab is-active" href="leaderboard.html">
+      <span class="tab-ico">🏆</span><span>Ranks</span>
+    </a>
+    <a class="tab" href="quiz.html">
+      <span class="tab-ico">⚡</span><span>Quiz</span>
+    </a>
+  </nav>
+
+  <script type="module">
+    import { supabase } from './assets/js/supabase.js';
+
+    async function loadFullLeaderboard() {
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      // Get active quiz
+      const { data: quiz } = await supabase.from('quizzes').select('id').eq('is_active', true).single();
+      if (!quiz) return;
+
+      const { data, error } = await supabase.from('weekly_leaderboard')
+        .select('*')
+        .eq('quiz_id', quiz.id)
+        .order('rank', { ascending: true })
+        .limit(10);
+
+      const board = document.getElementById('fullBoard');
+      board.innerHTML = '';
+
+      if (!data || data.length === 0) {
+        board.innerHTML = '<li style="text-align: center; color: var(--muted);">No players yet. Play to claim #1!</li>';
+        return;
+      }
+
+      data.forEach(row => {
+        // We don't have user_id in the view, so we can't perfectly match, 
+        // but we can check if the name matches the current user's profile name for visual highlight.
+        // (In a real app, add user_id to the view).
+        const isYou = row.full_name === user?.user_metadata?.full_name;
+        
+        board.innerHTML += `
+          <li class="${isYou ? 'is-you' : ''}">
+            <span class="rank" style="${row.rank === 1 ? 'color: #fbbf24;' : row.rank === 2 ? 'color: #cbd5e1;' : row.rank === 3 ? 'color: #b45309;' : ''}">#${row.rank}</span>
+            <span class="avatar" style="width:32px;height:32px;font-size:0.9rem; margin-left: 8px;">${row.full_name?.charAt(0) || '?'}</span>
+            <span class="row-name">${row.full_name} ${isYou ? '(You)' : ''}</span>
+            <span class="row-score">${row.score}/10</span>
+          </li>
+        `;
+      });
+    }
+
+    loadFullLeaderboard();
+  </script>
+</body>
+        </html>
