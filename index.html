@@ -4,21 +4,23 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <meta name="theme-color" content="#050915" />
-<title>AfriQuiz — Weekly Academic Arena</title>
+<title>AfriGenius — Africa’s weekly knowledge arena</title>
+<link rel="icon" type="image/svg+xml" href="assets/img/logo.svg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@600;800&family=Figtree:wght@400;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="assets/css/styles.css" />
 </head>
 <body>
 
 <!-- AUTH VIEW -->
 <section id="authView" class="shell auth-shell" hidden>
-  <div class="brand">
-    <div class="brand-mark">AQ</div>
-    <h1 class="brand-name">Afri<span>Quiz</span></h1>
-    <p class="brand-tag">Africa's weekly academic arena</p>
+  <div class="brand"><div class="logo-wrap">
+    <img class="logo" src="assets/img/logo.svg" alt="AfriGenius logo" width="64" height="64"></div>
+    <h1 class="brand-name">Afri<b>Genius</b></h1>
+    <p class="brand-tag">Prove what Africa knows. Ten questions a week, every nation on one board.</p>
   </div>
+  <p class="quote" id="quote"></p>
   <div class="glass card auth-card">
     <div class="seg" role="tablist">
       <button class="seg-btn is-active" data-mode="login" type="button">Log in</button>
@@ -28,6 +30,10 @@
       <label class="field" id="nameField" hidden>
         <span>Full name</span>
         <input id="fullName" type="text" placeholder="e.g. Tariro Moyo" autocomplete="name" />
+      </label>
+      <label class="field" id="countryField" hidden>
+        <span>Your country</span>
+        <select id="country"></select>
       </label>
       <label class="field">
         <span>Email</span>
@@ -41,14 +47,14 @@
       <p class="hint" id="authHint"></p>
     </form>
   </div>
-  <p class="footnote">10 questions · 5 minutes · One attempt per week</p>
+  <p class="footnote">One attempt a week. Built in Zimbabwe, made for all of Africa.</p>
 </section>
 
 <!-- APP VIEW -->
 <section id="appView" class="shell" hidden>
   <header class="topbar">
     <div class="user">
-      <div class="avatar" id="avatar">AQ</div>
+      <div class="avatar" id="avatar">R</div>
       <div class="user-txt">
         <p class="eyebrow">Welcome back</p>
         <h2 class="user-name" id="userName">Loading…</h2>
@@ -66,27 +72,32 @@
       <p class="pill pill-ghost" id="quizWeek">Week —</p>
     </div>
     <h1 class="hero-title" id="quizTitle">Loading quiz…</h1>
-    <p class="hero-sub" id="quizMeta">10 questions · 5 minutes · 1 attempt</p>
+    <p class="hero-sub" id="quizMeta">10 questions in 5 minutes. One attempt.</p>
     <div class="countdown">
-      <div class="cd-head"><span class="cd-label">Leaderboard resets in</span></div>
+      <div class="cd-head"><span class="cd-label">New quiz and fresh board in</span></div>
       <div class="cd-value" id="countdown">--d --h --m --s</div>
       <div class="cd-bar"><i id="cdBar" style="width:100%"></i></div>
     </div>
     <button class="btn btn-gold btn-lg btn-block" id="startBtn" type="button">
-      Start Quiz <span class="btn-arrow">→</span>
+      Start this week’s quiz
     </button>
     <p class="hint" id="startHint"></p>
   </section>
 
   <section class="stats">
-    <div class="glass card stat"><p class="stat-label">Weekly best</p><p class="stat-value" id="statBest">—</p></div>
-    <div class="glass card stat"><p class="stat-label">Global rank</p><p class="stat-value" id="statRank">—</p></div>
+    <div class="glass card stat"><p class="stat-label">This week</p><p class="stat-value" id="statBest">—</p></div>
+    <div class="glass card stat"><p class="stat-label">Rank</p><p class="stat-value" id="statRank">—</p></div>
     <div class="glass card stat"><p class="stat-label">Total XP</p><p class="stat-value" id="statXp">—</p></div>
   </section>
 
   <section class="glass card">
+    <div class="card-head"><h3>Nation Cup</h3><span class="eyebrow">average score by country</span></div>
+    <ul class="mini-board" id="nationBoard"><li class="skeleton-row"></li></ul>
+  </section>
+
+  <section class="glass card">
     <div class="card-head">
-      <h3>Top players this week</h3>
+      <h3>Leading this week</h3>
       <a href="leaderboard.html" class="link">View all</a>
     </div>
     <ul class="mini-board" id="miniBoard">
@@ -102,5 +113,9 @@
 </nav>
 
 <script type="module" src="assets/js/dashboard.js"></script>
+<script>
+const q=["Every wrong answer is a lantern lit in the dark.","Ignorance is a comfortable room with no windows.","The night is long for those who never ask why."];
+document.getElementById('quote').textContent=q[new Date().getDay()%q.length];
+</script>
 </body>
 </html>

@@ -4,59 +4,44 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <meta name="theme-color" content="#050915" />
-  <title>AfriQuiz — Weekly Academic Arena</title>
+  <title>AfriGenius — The weekly knowledge arena</title>
+<link rel="icon" type="image/svg+xml" href="assets/img/logo.svg">
   <link rel="stylesheet" href="assets/css/styles.css" />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
-  <style>
-    .quiz-progress { height:6px; background:rgba(255,255,255,.1); border-radius:99px; overflow:hidden; margin:0 0 22px; }
-    .quiz-progress > i { display:block; width:0; height:100%; background:var(--gold); transition:width .2s ease; }
-    .quiz-meta { display:flex; justify-content:space-between; align-items:center; gap:12px; margin-bottom:12px; }
-    .quiz-counter { color:var(--muted); font-size:.85rem; }
-    .timer.is-urgent { color:var(--red); }
-    .question-explanation { margin-top:16px; padding:14px; border:1px solid var(--border); border-radius:14px; color:var(--muted); line-height:1.5; }
-    .question-explanation.is-correct { border-color:var(--green); }
-    .question-explanation.is-wrong { border-color:var(--red); }
-    .question-actions { display:flex; gap:10px; margin-top:16px; }
-    .question-actions .btn { min-height:48px; padding:12px 18px; }
-    .quiz-error { color:var(--red); padding:14px 0; line-height:1.5; }
-    .option:disabled { cursor:default; opacity:1; }
-    .result-badge { display:inline-block; margin:12px 0; padding:8px 12px; border-radius:99px; color:var(--gold); background:rgba(251,191,36,.1); }
-    @media (max-width:430px) { .question-actions { flex-direction:column; } }
-  </style>
-</head>
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@600;800&family=Figtree:wght@400;600;700&display=swap" rel="stylesheet">
+  </head>
 <body>
-  <div class="shell" style="padding-top: 24px;">
+  <div class="shell">
     <div class="quiz-meta">
-      <a href="index.html" style="color:var(--muted);text-decoration:none">← Home</a>
+      <a href="index.html" class="logo-link"><img class="logo" src="assets/img/logo.svg" alt="AfriGenius logo" width="64" height="64"><span>AfriGenius</span></a>
       <span class="timer" id="quizTimer" aria-live="polite">5:00</span>
     </div>
     <div id="quizView">
-      <div class="quiz-meta"><span class="eyebrow" id="questionProgress">Preparing quiz…</span><span id="streakLabel" class="quiz-counter">🔥 Streak 0</span></div>
+      <div class="quiz-meta"><span class="eyebrow" id="questionProgress">Getting your questions ready</span><span id="streakLabel" class="quiz-counter">🔥 Streak 0</span></div>
       <div class="quiz-progress" role="progressbar" aria-label="Quiz progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="quizProgress"><i id="quizProgressFill"></i></div>
       <div class="glass card">
-        <p class="eyebrow" id="questionCategory" style="margin-bottom:10px">AFRIQUIZ</p>
+        <p class="eyebrow" id="questionCategory">AFRIGENIUS</p>
         <h2 class="question-text" id="questionText" tabindex="-1">Loading question…</h2>
         <div class="options" id="optionsContainer" aria-label="Answer choices"></div>
         <div id="questionExplanation" class="question-explanation" hidden aria-live="polite"></div>
-        <div class="question-actions"><button id="nextQuestionBtn" class="btn btn-gold btn-block" type="button" disabled>Continue →</button></div>
+        <div class="question-actions"><button id="nextQuestionBtn" class="btn btn-gold btn-block" type="button" disabled>Next question</button></div>
         <p class="hint" id="quizHint" role="status"></p>
       </div>
     </div>
     <div id="resultView" hidden>
-      <div class="glass card" style="text-align:center;padding:34px 20px">
-        <p style="font-size:3.5rem;margin-bottom:12px" aria-hidden="true">🏆</p>
-        <p class="eyebrow">CHALLENGE COMPLETE</p>
-        <h1 class="hero-title" style="margin:8px 0">Well played!</h1>
+      <div class="glass card result">
+        <h1 class="hero-title">Quiz complete</h1>
+        <p class="tiles" id="tiles" aria-hidden="true"></p>
         <p class="hero-sub" id="resultMessage">Your results are ready.</p>
-        <div class="stats" style="margin-top:24px">
+        <div class="stats" style="margin-top:20px">
           <div class="stat glass"><p class="stat-label">Score</p><p class="stat-value" id="finalScore">0/0</p></div>
           <div class="stat glass"><p class="stat-label">Accuracy</p><p class="stat-value" id="finalAccuracy">0%</p></div>
           <div class="stat glass"><p class="stat-label">Time</p><p class="stat-value" id="finalTime">0:00</p></div>
         </div>
         <p id="xpEarned" class="result-badge" hidden></p>
-        <div id="reviewList" style="text-align:left;margin-top:18px;display:grid;gap:12px"></div>
-        <a href="leaderboard.html" class="btn btn-gold btn-block" style="margin-top:24px;text-decoration:none">View Leaderboard</a>
-        <a href="index.html" class="btn btn-block" style="margin-top:12px;background:transparent;color:var(--muted);text-decoration:none">Back to Home</a>
+        <button id="shareBtn" class="btn btn-gold btn-block" type="button">Share my result on WhatsApp</button>
+        <div id="reviewList" class="review-list"></div>
+        <a href="leaderboard.html" class="btn btn-ghost btn-block" style="margin-top:18px">See the leaderboard</a>
+        <a href="index.html" class="btn btn-block" style="margin-top:8px;background:none;color:var(--muted)">Back home</a>
       </div>
     </div>
   </div>
