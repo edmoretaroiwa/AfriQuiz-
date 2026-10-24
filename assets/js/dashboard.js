@@ -49,31 +49,41 @@ document.querySelectorAll('.seg-btn').forEach(btn => {
     document.getElementById('nameField').hidden = currentMode === 'login';
     document.getElementById('countryField').hidden = currentMode === 'login';
     authSubmit.textContent = currentMode === 'login' ? 'Log in' : 'Create account';
+    document.getElementById('password').autocomplete = currentMode === 'login' ? 'current-password' : 'new-password';
+    authHint.textContent = '';
   });
 });
 
 // Auth Handler
 authForm.addEventListener('submit', async (e) => {
   e.preventDefault();
-  authSubmit.disabled = true;
   authHint.textContent = '';
-  
-  const email = document.getElementById('email').value;
+  authHint.style.color = '';
+
+  const email = document.getElementById('email').value.trim();
   const password = document.getElementById('password').value;
-  const fullName = document.getElementById('fullName').value;
+  const fullName = document.getElementById('fullName').value.trim();
+  const problem = !email ? 'Enter your email.'
+    : password.length < 6 ? 'Your password needs at least 6 characters.'
+    : currentMode === 'signup' && !fullName ? 'Enter your full name.'
+    : currentMode === 'signup' && !countrySel.value ? 'Choose your country so it can compete in the Nation Cup.'
+    : '';
+  if (problem) { authHint.textContent = problem; return; }
+  authSubmit.disabled = true;
 
   try {
     if (currentMode === 'login') {
       const { error } = await supabase.auth.signInWithPassword({ email, password });
       if (error) throw error;
     } else {
-      const { error } = await supabase.auth.signUp({ 
+      const { data, error } = await supabase.auth.signUp({ 
         email, password,
         options: { data: { full_name: fullName, country: countrySel.value } }
       });
       if (error) throw error;
-      authHint.textContent = "Check your email for the confirmation link!";
-      authHint.style.color = "var(--green)";
+      if (data?.session) return; // email confirmation is off: signed in already
+      authHint.textContent = 'Check your email for the confirmation link, then log in.';
+      authHint.style.color = 'var(--green)';
     }
   } catch (err) {
     authHint.textContent = err.message;
@@ -95,7 +105,10 @@ async function checkSession() {
 }
 
 // Load App Data
+let appShown = false;
 async function showApp(user) {
+  if (appShown) return;
+  appShown = true;
   authView.hidden = true;
   appView.hidden = false;
   tabbar.hidden = false;
@@ -179,6 +192,10 @@ async function loadNations(quizId) {
 document.getElementById('logoutBtn').addEventListener('click', async () => {
   await supabase.auth.signOut();
   window.location.reload();
+});
+
+supabase.auth.onAuthStateChange((event, session) => {
+  if (event === 'SIGNED_IN' && session) showApp(session.user);
 });
 
 checkSession();
