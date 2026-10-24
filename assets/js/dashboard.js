@@ -1,4 +1,8 @@
 import { supabase } from './supabase.js';
+import { COUNTRIES, flag } from './countries.js';
+
+const countrySel = document.getElementById('country');
+countrySel.innerHTML = '<option value="">Choose your country</option>' + Object.entries(COUNTRIES).map(([c, n]) => `<option value="${c}">${flag(c)} ${n}</option>`).join('');
 
 // DOM Elements
 const authView = document.getElementById('authView');
@@ -43,6 +47,7 @@ document.querySelectorAll('.seg-btn').forEach(btn => {
     e.target.classList.add('is-active');
     currentMode = e.target.dataset.mode;
     document.getElementById('nameField').hidden = currentMode === 'login';
+    document.getElementById('countryField').hidden = currentMode === 'login';
     authSubmit.textContent = currentMode === 'login' ? 'Log in' : 'Create account';
   });
 });
@@ -64,7 +69,7 @@ authForm.addEventListener('submit', async (e) => {
     } else {
       const { error } = await supabase.auth.signUp({ 
         email, password,
-        options: { data: { full_name: fullName } }
+        options: { data: { full_name: fullName, country: countrySel.value } }
       });
       if (error) throw error;
       authHint.textContent = "Check your email for the confirmation link!";
@@ -108,6 +113,7 @@ async function showApp(user) {
     document.getElementById('quizWeek').textContent = `Week ${quiz.week_number}`;
     checkSubmission(quiz.id, user.id);
     loadLeaderboard(quiz.id, user.id);
+    loadNations(quiz.id);
   }
 }
 
@@ -150,11 +156,23 @@ async function loadLeaderboard(quizId, userId) {
     board.innerHTML += `
       <li>
         <span class="rank">#${row.rank}</span>
-        <span class="avatar" style="width:32px;height:32px;font-size:0.9rem;">${row.full_name?.charAt(0) || '?'}</span>
+        <span class="flag">${flag(row.country)}</span>
         <span class="row-name">${row.full_name}</span>
         <span class="row-score">${row.score}/10</span>
       </li>
     `;
+  });
+}
+
+async function loadNations(quizId) {
+  const { data } = await supabase.from('country_standings').select('*').eq('quiz_id', quizId).order('avg_score', { ascending: false }).limit(5);
+  const board = document.getElementById('nationBoard');
+  board.replaceChildren();
+  if (!data?.length) { board.innerHTML = '<li class="eyebrow">No country has scored yet. Be the first to put yours on the map.</li>'; return; }
+  data.forEach((r, i) => {
+    const li = document.createElement('li');
+    li.innerHTML = `<span class="rank">#${i + 1}</span><span class="flag">${flag(r.country)}</span><span class="row-name">${COUNTRIES[r.country] || r.country}</span><span class="row-score">${r.avg_score} avg</span>`;
+    board.append(li);
   });
 }
 

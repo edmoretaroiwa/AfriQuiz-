@@ -158,8 +158,9 @@ function renderQuestion() {
   isAnswered = false;
   const q = questions[currentQuestion];
   $('questionProgress').textContent = `Question ${currentQuestion + 1} of ${questions.length}`;
-  $('questionCategory').textContent = q.category || activeQuizTitle || 'AFRIQUIZ';
+  $('questionCategory').textContent = q.category || activeQuizTitle || 'AFRIGENIUS';
   $('questionText').textContent = q.prompt;
+  const qt = $('questionText'); qt.classList.remove('enter'); void qt.offsetWidth; qt.classList.add('enter');
   $('questionText').focus({ preventScroll: true });
   $('streakLabel').textContent = `🔥 Streak ${correctStreak}`;
   $('quizHint').textContent = '';
@@ -238,6 +239,7 @@ async function finishQuiz(reason) {
     : accuracy >= 50 ? 'Good effort. Review the answers and keep learning.'
     : 'Every question is a chance to learn. Review the explanations and try again.';
   renderReview();
+  renderTiles();
 
   // Persistence stays compatible with the existing schema. The database unique
   // constraint (user_id, quiz_id) is the final guard against duplicate attempts.
@@ -285,3 +287,48 @@ function renderReview() {
 }
 
 initQuiz();
+
+function tileRow() {
+  const total = questions.length || 10;
+  return Array.from({ length: total }, (_, i) => (i < review.length ? (review[i].correct ? '🟩' : '🟥') : '⬜')).join('');
+}
+
+function renderTiles() {
+  const el = $('tiles');
+  if (!el) return;
+  el.replaceChildren(...Array.from(tileRow()).map((t, i) => { const s = document.createElement('span'); s.textContent = t; s.className = 'tile-pop'; s.style.animationDelay = `${i * 90}ms`; return s; }));
+  countUp($('finalScore'), score, questions.length);
+  if (questions.length && score / questions.length >= 0.7) confetti();
+}
+
+function countUp(el, to, total) {
+  if (!el || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  const t0 = performance.now();
+  const step = (t) => { const p = Math.min(1, (t - t0) / 900); el.textContent = `${Math.round(to * p)}/${total}`; if (p < 1) requestAnimationFrame(step); };
+  requestAnimationFrame(step);
+}
+
+function confetti() {
+  if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  const c = document.createElement('canvas');
+  c.style.cssText = 'position:fixed;inset:0;pointer-events:none;z-index:300';
+  c.width = innerWidth; c.height = innerHeight;
+  document.body.append(c);
+  const ctx = c.getContext('2d');
+  const colors = ['#FFB627', '#3A63FF', '#19C28A', '#FF5C6C', '#8FB4FF'];
+  const bits = Array.from({ length: 90 }, () => ({ x: Math.random() * c.width, y: -20 - Math.random() * c.height * 0.4, vx: (Math.random() - 0.5) * 3, vy: 2 + Math.random() * 4, s: 5 + Math.random() * 6, r: Math.random() * 6, c: colors[Math.floor(Math.random() * colors.length)] }));
+  const t0 = performance.now();
+  (function frame(t) {
+    ctx.clearRect(0, 0, c.width, c.height);
+    bits.forEach((b) => { b.x += b.vx; b.y += b.vy; b.r += 0.12; ctx.save(); ctx.translate(b.x, b.y); ctx.rotate(b.r); ctx.fillStyle = b.c; ctx.fillRect(-b.s / 2, -b.s / 2, b.s, b.s * 0.6); ctx.restore(); });
+    if (t - t0 < 3200) requestAnimationFrame(frame); else c.remove();
+  })(t0);
+}
+
+$('shareBtn')?.addEventListener('click', () => {
+  const total = questions.length || 10;
+  const text = `AfriGenius — Week result\n${tileRow()}\n${score}/${total} in ${$('finalTime').textContent}\nCan you beat me?`;
+  const url = location.origin + location.pathname.replace('quiz.html', '');
+  if (navigator.share) navigator.share({ text, url }).catch(() => {});
+  else window.open(`https://wa.me/?text=${encodeURIComponent(`${text}\n${url}`)}`, '_blank', 'noopener');
+});
