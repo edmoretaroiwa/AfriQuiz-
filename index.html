@@ -117,5 +117,9 @@
 const q=["Every wrong answer is a lantern lit in the dark.","Ignorance is a comfortable room with no windows.","The night is long for those who never ask why."];
 document.getElementById('quote').textContent=q[new Date().getDay()%q.length];
 </script>
+<script>
+setTimeout(function(){var a=document.getElementById('authView'),b=document.getElementById('appView');
+if(a.hidden&&b.hidden){document.body.insertAdjacentHTML('afterbegin','<p style="padding:24px;color:#FF5C6C">The app could not start. Check that every file in the folder was uploaded, including assets/js/countries.js and assets/img/logo.svg, then hard refresh.</p>');}},6000);
+</script>
 </body>
 </html>

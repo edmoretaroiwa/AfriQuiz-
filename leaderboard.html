@@ -42,8 +42,8 @@
       const { data: { user } } = await supabase.auth.getUser();
       
       // Get active quiz
-      const { data: quiz } = await supabase.from('quizzes').select('id').eq('is_active', true).single();
-      if (!quiz) return;
+      const { data: quiz } = await supabase.from('quizzes').select('id').eq('is_active', true).limit(1).maybeSingle();
+      if (!quiz) { document.getElementById('fullBoard').innerHTML = '<li style="text-align:center;color:var(--muted)">No active quiz yet.</li>'; return; }
 
       const { data, error } = await supabase.from('weekly_leaderboard')
         .select('*')
