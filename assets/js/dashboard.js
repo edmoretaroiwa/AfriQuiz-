@@ -96,6 +96,12 @@ authForm.addEventListener('submit', async (e) => {
 async function checkSession() {
   const { data: { session } } = await supabase.auth.getSession();
   if (session) {
+    const { error: userError } = await supabase.auth.getUser();
+    if (userError && userError.status >= 400 && userError.status < 500) {
+      await supabase.auth.signOut();
+      authView.hidden = false; appView.hidden = true; tabbar.hidden = true;
+      return;
+    }
     showApp(session.user);
   } else {
     authView.hidden = false;
@@ -114,19 +120,26 @@ async function showApp(user) {
   tabbar.hidden = false;
 
   // Get Profile & Stats
-  const { data: profile } = await supabase.from('profiles').select('*').eq('id', user.id).single();
+  const { data: profile } = await supabase.from('profiles').select('*').eq('id', user.id).maybeSingle();
   document.getElementById('userName').textContent = profile?.full_name || user.email;
   document.getElementById('avatar').textContent = profile?.full_name?.charAt(0).toUpperCase() || 'A';
   document.getElementById('statXp').textContent = profile?.total_xp || '0';
 
   // Get Active Quiz
-  const { data: quiz } = await supabase.from('quizzes').select('*').eq('is_active', true).limit(1).single();
+  const { data: quiz } = await supabase.from('quizzes').select('*').eq('is_active', true).limit(1).maybeSingle();
   if (quiz) {
     document.getElementById('quizTitle').textContent = quiz.title;
     document.getElementById('quizWeek').textContent = `Week ${quiz.week_number}`;
     checkSubmission(quiz.id, user.id);
     loadLeaderboard(quiz.id, user.id);
     loadNations(quiz.id);
+  } else {
+    document.getElementById('quizTitle').textContent = 'No quiz this week yet';
+    document.getElementById('quizWeek').textContent = 'Week —';
+    document.getElementById('startBtn').disabled = true;
+    document.getElementById('startHint').textContent = 'A new quiz will be published soon.';
+    document.getElementById('miniBoard').innerHTML = '<li class="eyebrow">Nothing to rank yet.</li>';
+    document.getElementById('nationBoard').innerHTML = '<li class="eyebrow">Nothing to rank yet.</li>';
   }
 }
 
@@ -135,7 +148,7 @@ async function checkSubmission(quizId, userId) {
   const startBtn = document.getElementById('startBtn');
   const startHint = document.getElementById('startHint');
   
-  const { data } = await supabase.from('submissions').select('score').eq('quiz_id', quizId).eq('user_id', userId).single();
+  const { data } = await supabase.from('submissions').select('score').eq('quiz_id', quizId).eq('user_id', userId).maybeSingle();
   
   if (data) {
     startBtn.disabled = true;
@@ -195,7 +208,7 @@ document.getElementById('logoutBtn').addEventListener('click', async () => {
 });
 
 supabase.auth.onAuthStateChange((event, session) => {
-  if (event === 'SIGNED_IN' && session) showApp(session.user);
+  if (event === 'SIGNED_IN' && session) setTimeout(() => showApp(session.user), 0);
 });
 
 checkSession();

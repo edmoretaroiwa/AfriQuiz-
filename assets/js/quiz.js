@@ -79,7 +79,7 @@ async function initQuiz() {
     }
 
     const { data: qData, error: questionError } = await supabase.from('questions')
-      .select('id,prompt,option_a,option_b,option_c,option_d,correct_option')
+      .select('id,prompt,option_a,option_b,option_c,option_d,correct_option,explanation,category')
       .eq('quiz_id', activeQuizId);
     if (questionError) throw questionError;
     if (!qData || qData.length === 0) {
