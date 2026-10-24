@@ -126,7 +126,8 @@ async function showApp(user) {
   document.getElementById('statXp').textContent = profile?.total_xp || '0';
 
   // Get Active Quiz
-  const { data: quiz } = await supabase.from('quizzes').select('*').eq('is_active', true).limit(1).maybeSingle();
+  const { data: quiz, error: quizError } = await supabase.from('quizzes').select('*').eq('is_active', true).limit(1).maybeSingle();
+  if (quizError) console.error('Quiz load failed:', quizError);
   if (quiz) {
     document.getElementById('quizTitle').textContent = quiz.title;
     document.getElementById('quizWeek').textContent = `Week ${quiz.week_number}`;
@@ -137,7 +138,7 @@ async function showApp(user) {
     document.getElementById('quizTitle').textContent = 'No quiz this week yet';
     document.getElementById('quizWeek').textContent = 'Week —';
     document.getElementById('startBtn').disabled = true;
-    document.getElementById('startHint').textContent = 'A new quiz will be published soon.';
+    document.getElementById('startHint').textContent = quizError ? `Could not load the quiz: ${quizError.message}` : 'A new quiz will be published soon.';
     document.getElementById('miniBoard').innerHTML = '<li class="eyebrow">Nothing to rank yet.</li>';
     document.getElementById('nationBoard').innerHTML = '<li class="eyebrow">Nothing to rank yet.</li>';
   }
