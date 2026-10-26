@@ -1,5 +1,6 @@
 import { supabase } from './supabase.js';
 import { COUNTRIES, flag } from './countries.js';
+import { getTodaysQuiz } from './today.js';
 
 const countrySel = document.getElementById('country');
 countrySel.innerHTML = '<option value="">Choose your country</option>' + Object.entries(COUNTRIES).map(([c, n]) => `<option value="${c}">${flag(c)} ${n}</option>`).join('');
@@ -19,23 +20,14 @@ const cdBar = document.getElementById('cdBar');
 
 function updateCountdown() {
   const now = new Date();
-  const endOfWeek = new Date(now);
-  // Set to Sunday 23:59:59 of current week
-  endOfWeek.setDate(now.getDate() + (7 - now.getDay()) % 7);
-  endOfWeek.setHours(23, 59, 59, 999);
-
-  const diff = endOfWeek - now;
-  const d = Math.floor(diff / (1000 * 60 * 60 * 24));
-  const h = Math.floor((diff / (1000 * 60 * 60)) % 24);
-  const m = Math.floor((diff / 1000 / 60) % 60);
+  const end = new Date(now);
+  end.setHours(23, 59, 59, 999);
+  const diff = end - now;
+  const h = Math.floor(diff / 3600000);
+  const m = Math.floor((diff / 60000) % 60);
   const s = Math.floor((diff / 1000) % 60);
-
-  cdValue.textContent = `${d}d ${h}h ${m}m ${s}s`;
-  
-  // Calculate bar percentage (assuming 7 day week)
-  const totalMs = 7 * 24 * 60 * 60 * 1000;
-  const pct = (diff / totalMs) * 100;
-  cdBar.style.width = `${pct}%`;
+  cdValue.textContent = `${h}h ${m}m ${s}s`;
+  cdBar.style.width = `${(diff / 86400000) * 100}%`;
 }
 setInterval(updateCountdown, 1000);
 updateCountdown();
@@ -126,11 +118,11 @@ async function showApp(user) {
   document.getElementById('statXp').textContent = profile?.total_xp || '0';
 
   // Get Active Quiz
-  const { data: quiz, error: quizError } = await supabase.from('quizzes').select('*').eq('is_active', true).limit(1).maybeSingle();
+  const { data: quiz, error: quizError } = await getTodaysQuiz(supabase, '*');
   if (quizError) console.error('Quiz load failed:', quizError);
   if (quiz) {
     document.getElementById('quizTitle').textContent = quiz.title;
-    document.getElementById('quizWeek').textContent = `Week ${quiz.week_number}`;
+    document.getElementById('quizWeek').textContent = (quiz.available_on ? new Date(quiz.available_on + 'T00:00:00').toLocaleDateString(undefined, { weekday: 'short', day: 'numeric', month: 'short' }) : 'Today');
     checkSubmission(quiz.id, user.id);
     loadLeaderboard(quiz.id, user.id);
     loadNations(quiz.id);
@@ -154,7 +146,7 @@ async function checkSubmission(quizId, userId) {
   if (data) {
     startBtn.disabled = true;
     startBtn.textContent = `Completed (Score: ${data.score}/10)`;
-    startHint.textContent = "Come back next week for the new quiz!";
+    startHint.textContent = "Come back tomorrow for the next quiz!";
     document.getElementById('statBest').textContent = `${data.score}/10`;
   } else {
     startBtn.onclick = () => window.location.href = 'quiz.html';

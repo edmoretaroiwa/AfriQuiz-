@@ -1,4 +1,5 @@
 import { supabase } from './supabase.js';
+import { getTodaysQuiz } from './today.js';
 
 const QUIZ_DURATION_SECONDS = 300;
 let currentQuestion = 0;
@@ -49,7 +50,7 @@ async function initQuiz() {
   try {
     const [{ data: { user }, error: userError }, quizResponse] = await Promise.all([
       supabase.auth.getUser(),
-      supabase.from('quizzes').select('id,title').eq('is_active', true).limit(1).maybeSingle()
+      getTodaysQuiz(supabase, 'id,title')
     ]);
     if (userError) console.warn('Unable to verify signed-in user:', userError.message);
     sessionUser = user || null;
@@ -70,7 +71,7 @@ async function initQuiz() {
       if (prior) {
         quizView.hidden = true;
         resultView.hidden = false;
-        $('resultMessage').textContent = 'You have already submitted this weekly quiz. Come back for the next challenge.';
+        $('resultMessage').textContent = 'You have already played today’s quiz. Come back tomorrow for the next one.';
         $('finalScore').textContent = `${prior.score}/10`;
         $('finalTime').textContent = formatTime(prior.time_taken_seconds);
         $('finalAccuracy').textContent = `${Math.round((Number(prior.score) / 10) * 100)}%`;
@@ -99,7 +100,7 @@ async function initQuiz() {
     console.error('Quiz initialization failed:', error);
     // Compatibility path for the original schema (which contains no category/explanation).
     try {
-      const { data: quiz, error: quizError } = await supabase.from('quizzes').select('id,title').eq('is_active', true).limit(1).maybeSingle();
+      const { data: quiz, error: quizError } = await getTodaysQuiz(supabase, 'id,title');
       if (quizError || !quiz) throw quizError || new Error('No active quiz found.');
       activeQuizId = quiz.id;
       activeQuizTitle = quiz.title || 'Weekly Quiz';
