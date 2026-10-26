@@ -3,15 +3,16 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>AfriGenius — This week’s ranks</title>
+  <title>AfriGenius — Today’s ranks</title>
 <link rel="icon" type="image/svg+xml" href="assets/img/logo.svg">
   <link rel="stylesheet" href="assets/css/styles.css" />
   <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@600;800&family=Figtree:wght@400;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
+<div class="aurora" aria-hidden="true"><i></i><i></i><i></i></div>
   <div class="shell">
     <header class="topbar" style="margin-top:12px;">
-      <h1 class="hero-title" style="font-size:1.6rem">This week’s ranks</h1>
+      <h1 class="hero-title" style="font-size:1.6rem">Today’s ranks</h1>
     </header>
 
     <div class="glass card">
@@ -37,12 +38,13 @@
   <script type="module">
     import { supabase } from './assets/js/supabase.js';
     import { flag } from './assets/js/countries.js';
+    import { getTodaysQuiz } from './assets/js/today.js';
 
     async function loadFullLeaderboard() {
       const { data: { user } } = await supabase.auth.getUser();
       
       // Get active quiz
-      const { data: quiz } = await supabase.from('quizzes').select('id').eq('is_active', true).limit(1).maybeSingle();
+      const { data: quiz } = await getTodaysQuiz(supabase, 'id');
       if (!quiz) { document.getElementById('fullBoard').innerHTML = '<li style="text-align:center;color:var(--muted)">No active quiz yet.</li>'; return; }
 
       const { data, error } = await supabase.from('weekly_leaderboard')
